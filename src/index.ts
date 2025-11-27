@@ -4,10 +4,14 @@ dotenv.config();
 import admin from "./firebase/firebase-admin";
 import connectDb from "./db";
 import morgan from "morgan";
+import createRoles from "./config/createRoles";
 
 const PORT = process.env.PORT || 3000;
 
 const app = express();
+console.log("Firebase conectado a", admin.app().name);
+connectDb();
+createRoles();
 
 app.use(express.json());
 app.use(morgan("dev"));
@@ -18,7 +22,5 @@ app.get("/", (_, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log("Firebase conectado a", admin.app().name);
-  connectDb();
   return console.log(`Servidor escuchando en puerto ${PORT} `);
 });
