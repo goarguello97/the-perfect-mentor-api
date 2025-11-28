@@ -10,7 +10,7 @@ interface IUser {
   email: string;
   password: string;
   mentor: Types.ObjectId[];
-  role: Types.ObjectId[];
+  role: Types.ObjectId;
   md: Types.ObjectId[];
   matchReq: Types.ObjectId[];
   matchSend: Types.ObjectId[];

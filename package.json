@@ -20,8 +20,10 @@
     "@types/mongoose": "^5.11.96",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.10.1",
+    "@types/supertest": "^6.0.3",
     "jest": "^30.2.0",
     "nodemon": "^3.1.11",
+    "supertest": "^7.1.4",
     "ts-jest": "^29.4.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
@@ -32,6 +34,7 @@
     "express": "^5.1.0",
     "firebase-admin": "^13.6.0",
     "firebase-functions": "^7.0.0",
+    "firebase-tools": "^14.26.0",
     "mongoose": "^8.20.1",
     "morgan": "^1.10.1"
   }

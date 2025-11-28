@@ -3,13 +3,16 @@
     "target": "es2020",
     "module": "nodenext",
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
     "strict": true,
     "types": ["node", "jest"],
+    "baseUrl": ".",
+    "paths": { "@models/*": ["src/models/*"] },
     "skipLibCheck": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "__test__"]
+  "include": ["src/**/*", "__test__/**/*"],
+  "exclude": ["node_modules"]
 }

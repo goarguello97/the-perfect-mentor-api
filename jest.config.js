@@ -5,4 +5,7 @@ module.exports = {
   verbose: true,
   testMatch: ["**/__test__/**/*.test.ts"],
   testTimeout: 100000,
+  moduleNameMapper: {
+    "^@models/(.*)$": "<rootDir>/src/models/$1",
+  },
 };
