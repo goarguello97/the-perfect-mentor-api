@@ -29,4 +29,4 @@ const getTemplate = (token: string) => {
     </div>`;
 };
 
-export default { transporter, getTemplate };
+export { getTemplate, transporter };

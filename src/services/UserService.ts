@@ -1,5 +1,10 @@
 import User from "@models/User";
+import dotenv from "dotenv";
+import { generateTokenRegister } from "src/config/token";
+import { getTemplate, transporter } from "src/utils/email";
 
+dotenv.config();
+const EMAIL = process.env.EMAIL as string;
 class UserService {
   static async getUsers() {
     try {
@@ -32,6 +37,17 @@ class UserService {
 
       const newUser = new User({ email });
 
+      const token = generateTokenRegister(newUser);
+      const template = getTemplate(token);
+
+      await transporter.sendMail({
+        from: `The Perfect Mentor <${EMAIL}>`,
+        to: email,
+        subject: "Verificar cuenta",
+        text: "...",
+        html: template,
+      });
+
       await newUser.save();
 
       return { error: false, data: newUser };
@@ -55,6 +71,23 @@ class UserService {
       const response = await User.findByIdAndDelete(id);
 
       return { error: false, data: response };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+
+  static async activateUser(email: string) {
+    try {
+      const user = await User.findOne({ email });
+      if (!user) throw new Error("Usuario no disponible.");
+
+      user.verify = true;
+
+      await user.save();
+      return {
+        error: false,
+        data: user,
+      };
     } catch (error) {
       return { error: true, data: error };
     }
