@@ -6,6 +6,8 @@
     "rootDir": ".",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "types": ["node", "jest"],
