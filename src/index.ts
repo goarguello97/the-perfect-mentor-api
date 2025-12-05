@@ -24,3 +24,5 @@ app.get("/", (_, res) => {
 app.listen(PORT, () => {
   return console.log(`Servidor escuchando en puerto ${PORT} `);
 });
+
+export { app };
