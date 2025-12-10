@@ -1,6 +1,6 @@
 import User from "@models/User";
 import dotenv from "dotenv";
-import { generateTokenRegister } from "src/config/token";
+import { generateTokenRegister, validateToken } from "src/config/token";
 import { getTemplate, transporter } from "src/utils/email";
 
 dotenv.config();
@@ -76,8 +76,10 @@ class UserService {
     }
   }
 
-  static async activateUser(email: string) {
+  static async activateUser(token: string) {
     try {
+      const payload = validateToken(token);
+      const email = payload;
       const user = await User.findOne({ email });
       if (!user) throw new Error("Usuario no disponible.");
 
