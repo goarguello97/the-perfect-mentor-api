@@ -55,6 +55,21 @@ class UserController {
 
     return res.status(200).json(data);
   }
+
+  static async addAvatar(req: Request, res: Response) {
+    const file = req.file;
+    const { id } = req.body;
+
+    if (!file) throw new Error("No ingreso una foto.");
+
+    const { error, data } = await UserService.addAvatar(file, id);
+
+    if (error) {
+      return res.status(404).json(data);
+    }
+
+    return res.status(200).json(data);
+  }
 }
 
 export default UserController;
