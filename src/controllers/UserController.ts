@@ -1,5 +1,5 @@
+import UserService from "@services/UserService";
 import { Request, Response } from "express";
-import UserService from "src/services/UserService";
 
 class UserController {
   static async getUsers(_: Request, res: Response) {
