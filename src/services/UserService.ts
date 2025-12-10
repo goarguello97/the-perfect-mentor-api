@@ -1,5 +1,14 @@
+import Avatar from "@models/Avatar";
 import User from "@models/User";
 import dotenv from "dotenv";
+import {
+  deleteObject,
+  getDownloadURL,
+  getStorage,
+  ref,
+  uploadBytesResumable,
+} from "firebase/storage";
+import path from "path";
 import { generateTokenRegister, validateToken } from "src/config/token";
 import { getTemplate, transporter } from "src/utils/email";
 
@@ -90,6 +99,61 @@ class UserService {
         error: false,
         data: user,
       };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+
+  static async addAvatar(file: Express.Multer.File, id: string) {
+    try {
+      if (!file) throw new Error("Archivo inexistente.");
+
+      const user = await User.findById(id).populate("avatar", { imageUrl: 1 });
+
+      if (!user) throw new Error("Usuario inexistente.");
+
+      if (user.avatar) {
+        const oldAvatar = await Avatar.findById(user.avatar._id);
+
+        if (!oldAvatar) throw new Error("Avatar inexistente.");
+
+        if (oldAvatar.title !== "default") {
+          const fileToRemove = ref(getStorage(), `avatars/${oldAvatar.title}`);
+          await Promise.all([
+            deleteObject(fileToRemove),
+            oldAvatar.deleteOne(),
+          ]);
+        }
+      }
+
+      const fileName = id + path.extname(file.originalname);
+
+      const storageRef = ref(getStorage(), `avatars/${fileName}`);
+
+      const metadata = {
+        contentType: file.mimetype,
+      };
+
+      const snapshot = await uploadBytesResumable(
+        storageRef,
+        file.buffer!,
+        metadata
+      );
+
+      const downloadUrl = await getDownloadURL(snapshot.ref);
+
+      const newAvatar = {
+        title: fileName,
+        imageUrl: downloadUrl,
+      };
+
+      const avatar = new Avatar(newAvatar);
+      await avatar.save();
+
+      user.avatar = avatar._id;
+      await user.save();
+
+      return { error: false, data: user };
     } catch (error) {
       return { error: true, data: error };
     }
