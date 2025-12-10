@@ -4,6 +4,7 @@
     "module": "nodenext",
     "outDir": "./dist",
     "rootDir": ".",
+    "typeRoots": ["./node_modules/@types", "./src/types"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
