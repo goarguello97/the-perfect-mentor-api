@@ -44,7 +44,7 @@ class UserController {
     return res.status(200).json(data);
   }
 
-  static async verifyUser(req: Request, res: Response) {
+  static async activateUser(req: Request, res: Response) {
     const { token } = req.params;
 
     const { error, data } = await UserService.activateUser(token);
