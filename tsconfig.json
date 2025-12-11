@@ -11,9 +11,13 @@
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
-    "types": ["node", "jest"],
+    "types": ["node", "jest", "express", "multer"],
     "baseUrl": ".",
-    "paths": { "@models/*": ["src/models/*"] },
+    "paths": {
+      "@models/*": ["src/models/*"],
+      "@controllers/*": ["src/controllers/*"],
+      "@services/*": ["src/services/*"]
+    },
     "skipLibCheck": true
   },
   "include": ["src/**/*", "__test__/**/*"],

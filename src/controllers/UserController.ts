@@ -1,5 +1,5 @@
+import UserService from "@services/UserService";
 import { Request, Response } from "express";
-import UserService from "src/services/UserService";
 
 class UserController {
   static async getUsers(_: Request, res: Response) {
@@ -48,6 +48,21 @@ class UserController {
     const { token } = req.params;
 
     const { error, data } = await UserService.activateUser(token);
+
+    if (error) {
+      return res.status(404).json(data);
+    }
+
+    return res.status(200).json(data);
+  }
+
+  static async addAvatar(req: Request, res: Response) {
+    const file = req.file;
+    const { id } = req.body;
+
+    if (!file) throw new Error("No ingreso una foto.");
+
+    const { error, data } = await UserService.addAvatar(file, id);
 
     if (error) {
       return res.status(404).json(data);
