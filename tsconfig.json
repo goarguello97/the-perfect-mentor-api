@@ -16,7 +16,10 @@
     "paths": {
       "@models/*": ["src/models/*"],
       "@controllers/*": ["src/controllers/*"],
-      "@services/*": ["src/services/*"]
+      "@services/*": ["src/services/*"],
+      "@helpers/*": ["src/helpers/*"],
+      "@schemas/*": ["src/schemas/*"],
+      "@middlewares/*": ["src/middlewares/*"]
     },
     "skipLibCheck": true
   },
