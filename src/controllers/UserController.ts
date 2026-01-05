@@ -21,8 +21,9 @@ class UserController {
   static async addUser(req: Request, res: Response) {
     const user = req.body;
     const { error, data } = await UserService.addUser(user);
-    if (error) return res.status(409).json(error);
-
+    if (error) return res.status(409).json(data);
+    console.log(error);
+    console.log(data);
     res.status(201).json(data);
   }
 
@@ -64,6 +65,17 @@ class UserController {
 
     const { error, data } = await UserService.addAvatar(file, id);
 
+    if (error) {
+      return res.status(404).json(data);
+    }
+
+    return res.status(200).json(data);
+  }
+
+  static async loginUser(req: Request, res: Response) {
+    const user = req.body;
+
+    const { error, data } = await UserService.loginUser(user);
     if (error) {
       return res.status(404).json(data);
     }

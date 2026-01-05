@@ -1,7 +1,7 @@
 import { model, Schema, Types } from "mongoose";
 
 interface IUser {
-  _id: string;
+  id: string;
   username: string;
   name: string;
   lastname: string;
@@ -23,6 +23,7 @@ interface IUser {
 
 const UserSchema = new Schema<IUser>(
   {
+    id: { type: String, require: true, unique: true },
     username: { type: String, require: true, unique: true },
     name: { type: String },
     lastname: { type: String },

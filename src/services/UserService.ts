@@ -27,7 +27,7 @@ class UserService {
 
   static async getUserById(id: string) {
     try {
-      const response = await User.findById(id);
+      const response = await User.findOne({ where: { id } });
 
       return { error: false, data: response };
     } catch (error) {
@@ -35,16 +35,16 @@ class UserService {
     }
   }
 
-  static async addUser(user: { email: string }) {
+  static async addUser(user: { email: string; username: string; id: string }) {
     try {
-      const { email } = user;
+      const { email, username, id } = user;
 
       const userByEmail = await User.find({ where: { email } });
 
       if (userByEmail.length > 0)
         throw new Error(`El email ${email} ya se encuentra en uso.`);
 
-      const newUser = new User({ email });
+      const newUser = new User({ email, username, id });
 
       const token = generateTokenRegister(newUser);
       const template = getTemplate(token);
@@ -60,8 +60,8 @@ class UserService {
       await newUser.save();
 
       return { error: false, data: newUser };
-    } catch (error) {
-      return { error: true, data: error };
+    } catch (error: any) {
+      return { error: true, data: error.message };
     }
   }
 
@@ -154,6 +154,16 @@ class UserService {
       await user.save();
 
       return { error: false, data: user };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+
+  static async loginUser(user: { email: string; password: string }) {
+    try {
+      const { email, password } = user;
+
+      return { error: false };
     } catch (error) {
       return { error: true, data: error };
     }
