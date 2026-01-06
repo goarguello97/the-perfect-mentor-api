@@ -177,13 +177,14 @@ class UserService {
       const decodedToken = await admin.auth().verifyIdToken(token);
       const { uid } = decodedToken;
 
-      const user = await User.findOne({ where: { id: uid } });
+      const user = await User.findOne({ id: uid });
 
       if (!user) throw new Error("Usuario no registrado.");
+      if (!user.verify) throw new Error("Debes activar tu usuario.");
 
       return { error: false, data: user };
-    } catch (error) {
-      return { error: true, data: error };
+    } catch (error: any) {
+      return { error: true, data: error.message };
     }
   }
 }
