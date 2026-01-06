@@ -47,7 +47,7 @@ class UserService {
 
       const newUser = new User({ email, username, id });
 
-      const token = generateTokenRegister(newUser);
+      const token = generateTokenRegister({ email: newUser.email });
       const template = getTemplate(token);
 
       await transporter.sendMail({
@@ -86,11 +86,14 @@ class UserService {
     }
   }
 
-  static async activateUser(token: string) {
+  static async activateUser(token: string | undefined) {
     try {
+      if (!token) throw new Error("Token no definido");
+
       const payload = validateToken(token);
-      const email = payload;
-      const user = await User.findOne({ email });
+      
+      const user = await User.findOne({ payload });
+
       if (!user) throw new Error("Usuario no disponible.");
 
       user.verify = true;
@@ -177,13 +180,14 @@ class UserService {
       const decodedToken = await admin.auth().verifyIdToken(token);
       const { uid } = decodedToken;
 
-      const user = await User.findOne({ where: { id: uid } });
+      const user = await User.findOne({ id: uid });
 
       if (!user) throw new Error("Usuario no registrado.");
+      if (!user.verify) throw new Error("Debes activar tu usuario.");
 
       return { error: false, data: user };
-    } catch (error) {
-      return { error: true, data: error };
+    } catch (error: any) {
+      return { error: true, data: error.message };
     }
   }
 }

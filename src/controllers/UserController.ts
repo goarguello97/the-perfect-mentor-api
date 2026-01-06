@@ -22,8 +22,6 @@ class UserController {
     const user = req.body;
     const { error, data } = await UserService.addUser(user);
     if (error) return res.status(409).json(data);
-    console.log(error);
-    console.log(data);
     res.status(201).json(data);
   }
 
@@ -46,10 +44,9 @@ class UserController {
   }
 
   static async activateUser(req: Request, res: Response) {
-    const { token } = req.params;
+    const token = req.headers.authorization?.split(" ")[1];
 
     const { error, data } = await UserService.activateUser(token);
-
     if (error) {
       return res.status(404).json(data);
     }
