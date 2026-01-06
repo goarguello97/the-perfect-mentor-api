@@ -1,4 +1,5 @@
 import Avatar from "@models/Avatar";
+import Role from "@models/Role";
 import User from "@models/User";
 import dotenv from "dotenv";
 import {
@@ -45,7 +46,9 @@ class UserService {
       if (userByEmail.length > 0)
         throw new Error(`El email ${email} ya se encuentra en uso.`);
 
-      const newUser = new User({ email, username, id });
+      const role = await Role.findOne({ role: "MENTEE" });
+
+      const newUser = new User({ email, username, id, role });
 
       const token = generateTokenRegister({ email: newUser.email });
       const template = getTemplate(token);
@@ -91,7 +94,7 @@ class UserService {
       if (!token) throw new Error("Token no definido");
 
       const payload = validateToken(token);
-      
+
       const user = await User.findOne({ payload });
 
       if (!user) throw new Error("Usuario no disponible.");
@@ -180,7 +183,10 @@ class UserService {
       const decodedToken = await admin.auth().verifyIdToken(token);
       const { uid } = decodedToken;
 
-      const user = await User.findOne({ id: uid });
+      const user = await User.findOne({ id: uid }).populate("role", {
+        role: 1,
+        _id: 0,
+      });
 
       if (!user) throw new Error("Usuario no registrado.");
       if (!user.verify) throw new Error("Debes activar tu usuario.");
