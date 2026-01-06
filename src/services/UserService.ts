@@ -10,6 +10,7 @@ import {
 } from "firebase/storage";
 import path from "path";
 import { generateTokenRegister, validateToken } from "src/config/token";
+import admin from "src/firebase/firebase-admin";
 import { getTemplate, transporter } from "src/utils/email";
 
 dotenv.config();
@@ -164,6 +165,23 @@ class UserService {
       const { email, password } = user;
 
       return { error: false };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+
+  static async validationUser(token: string | undefined) {
+    try {
+      if (!token) throw new Error("Token no definido");
+
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      const { uid } = decodedToken;
+
+      const user = await User.findOne({ where: { id: uid } });
+
+      if (!user) throw new Error("Usuario no registrado.");
+
+      return { error: false, data: user };
     } catch (error) {
       return { error: true, data: error };
     }

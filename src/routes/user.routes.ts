@@ -15,5 +15,6 @@ userRouter.patch(
   multer({ storage: multer.memoryStorage() }).single("image"),
   UserController.addAvatar
 );
+userRouter.get("/validate", UserController.validationUser);
 
 export default userRouter;
