@@ -82,6 +82,18 @@ class UserController {
 
     return res.status(200).json(data);
   }
+
+  static async validationUser(req: Request, res: Response) {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    const { error, data } = await UserService.validationUser(token);
+
+    if (error) {
+      return res.status(404).json(data);
+    }
+
+    return res.status(200).json(data);
+  }
 }
 
 export default UserController;
