@@ -47,7 +47,7 @@ class UserService {
 
       const newUser = new User({ email, username, id });
 
-      const token = generateTokenRegister(newUser);
+      const token = generateTokenRegister({ email: newUser.email });
       const template = getTemplate(token);
 
       await transporter.sendMail({
@@ -86,11 +86,14 @@ class UserService {
     }
   }
 
-  static async activateUser(token: string) {
+  static async activateUser(token: string | undefined) {
     try {
+      if (!token) throw new Error("Token no definido");
+
       const payload = validateToken(token);
-      const email = payload;
-      const user = await User.findOne({ email });
+      
+      const user = await User.findOne({ payload });
+
       if (!user) throw new Error("Usuario no disponible.");
 
       user.verify = true;

@@ -5,7 +5,7 @@ dotenv.config();
 
 const EMAIL = process.env.EMAIL as string;
 const PASS = process.env.PASS as string;
-const URL = process.env.PASS as string;
+const URL = process.env.URL as string;
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
@@ -23,7 +23,7 @@ const getTemplate = (token: string) => {
       <h2>¡Hola!</h2>
       <p>Gracias por registrarte. Debes activar tu cuenta ingresando al siguiente enlace.</p>
       <a
-          href="${URL}/auth/${token}"
+          href="${URL}/activate/${token}"
           target="_blank"
       >Confirmar cuenta</a>
     </div>`;

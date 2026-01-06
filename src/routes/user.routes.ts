@@ -9,7 +9,7 @@ userRouter.post("/login", UserController.loginUser);
 userRouter.get("/:id", UserController.getUserById);
 userRouter.put("/:id", UserController.putUser);
 userRouter.delete("/:id", UserController.deleteUser);
-userRouter.get("/activate/:id", UserController.activateUser);
+userRouter.get("/auth/activate", UserController.activateUser);
 userRouter.patch(
   "/add/avatar",
   multer({ storage: multer.memoryStorage() }).single("image"),
