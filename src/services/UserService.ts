@@ -10,9 +10,17 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import path from "path";
-import { generateTokenRegister, validateToken } from "src/config/token";
+import {
+  generateTokenRecoverPassword,
+  generateTokenRegister,
+  validateToken,
+} from "src/config/token";
 import admin from "src/firebase/firebase-admin";
-import { getTemplate, transporter } from "src/utils/email";
+import {
+  getTemplate,
+  getTemplateRecoverPassword,
+  transporter,
+} from "src/utils/email";
 
 dotenv.config();
 const EMAIL = process.env.EMAIL as string;
@@ -192,6 +200,54 @@ class UserService {
       if (!user.verify) throw new Error("Debes activar tu usuario.");
 
       return { error: false, data: user };
+    } catch (error: any) {
+      return { error: true, data: error.message };
+    }
+  }
+
+  static async recoverPassword(email: string) {
+    try {
+      const user = await User.findOne({ email });
+
+      if (!user) throw new Error("Usuario no válido.");
+
+      const token = generateTokenRecoverPassword({ email: user.email });
+      const template = getTemplateRecoverPassword(user.username, token);
+
+      await transporter.sendMail({
+        from: `The Perfect Mentor <${EMAIL}>`,
+        to: email,
+        subject: "Recuperar contraseña",
+        text: "...",
+        html: template,
+      });
+
+      user.recoveryToken = token;
+      await user.save();
+
+      return {
+        error: false,
+        data: { message: "Se ha enviado un email de recuperación, revise su bandeja de entrada por favor." },
+      };
+    } catch (error: any) {
+      return { error: true, data: error.message };
+    }
+  }
+
+  static async updatePassword(email: string, password: string) {
+    try {
+      const user = await User.findOne({ email });
+
+      if (!user) throw new Error("Usuario no válido.");
+
+      user.recoveryToken = "";
+      await user.save();
+      await admin.auth().updateUser(user.id, { password });
+
+      return {
+        error: false,
+        data: { message: "Contraseña modificada exitosamente." },
+      };
     } catch (error: any) {
       return { error: true, data: error.message };
     }

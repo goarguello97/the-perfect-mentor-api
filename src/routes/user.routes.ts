@@ -1,6 +1,7 @@
 import UserController from "@controllers/UserController";
 import { Router } from "express";
 import multer from "multer";
+import { isAuth } from "src/middlewares/isAuth";
 const userRouter = Router();
 
 userRouter.get("/", UserController.getUsers);
@@ -16,5 +17,7 @@ userRouter.patch(
   UserController.addAvatar
 );
 userRouter.get("/auth/validate", UserController.validationUser);
+userRouter.post("/recover-password", UserController.recoverPassword);
+userRouter.put("/update/password", isAuth, UserController.updatePassword);
 
 export default userRouter;

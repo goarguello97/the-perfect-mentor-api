@@ -1,7 +1,6 @@
-import Role from "@models/Role";
 import User from "@models/User";
 import { NextFunction, Request, Response } from "express";
-import * as admin from "firebase-admin";
+import { validateToken } from "../config/token";
 
 export const isAuth = async (
   req: Request,
@@ -20,11 +19,11 @@ export const isAuth = async (
   const token = authHeader.split("Bearer ")[1];
 
   try {
-    const decodedToken = await admin.auth().verifyIdToken(token);
+    const decodedToken = validateToken(token);
 
-    const id = decodedToken.uid;
+    const { email } = decodedToken.user;
 
-    const user = await User.findById(id).populate("role", { role: 1 });
+    const user = await User.findOne({ email });
 
     if (!user)
       return res.status(401).json({
@@ -32,18 +31,8 @@ export const isAuth = async (
         message: "Acceso denegado: Token no proporcionado o incorrecto.",
       });
 
-    const role = await Role.findById(user.role);
+    req.user = { email };
 
-    if (!role)
-      return res.status(401).json({
-        error: true,
-        message: "Acceso denegado.",
-      });
-
-    req.user = {
-      id: decodedToken.uid,
-      role: role.role,
-    };
     next();
   } catch (error) {
     return res.status(401).json({

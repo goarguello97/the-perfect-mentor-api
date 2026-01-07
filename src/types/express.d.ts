@@ -1,8 +1,7 @@
 import "express";
 
 interface UserPayload {
-  id: string;
-  role: "ADMIN" | "MENTOR" | "MENTEE";
+  email: string;
 }
 
 declare module "express" {
