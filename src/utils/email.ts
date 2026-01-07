@@ -29,4 +29,16 @@ const getTemplate = (token: string) => {
     </div>`;
 };
 
-export { getTemplate, transporter };
+const getTemplateRecoverPassword = (username: string, token: string) => {
+  return `
+  <div id="email___content">
+  <h2>¡Hola ${username}!</h2>
+  <p>Entra al siguiente enlace para recuperar tu contraseña.</p>
+  <a
+      href="${URL}/change-password/${token}"
+      target="_blank"
+  >Cambiar contraseña</a>
+</div>`;
+};
+
+export { getTemplate, getTemplateRecoverPassword, transporter };

@@ -1,3 +1,4 @@
+/// <reference types="../types/express" />
 import UserService from "@services/UserService";
 import { Request, Response } from "express";
 
@@ -84,6 +85,39 @@ class UserController {
     const token = req.headers.authorization?.split(" ")[1];
 
     const { error, data } = await UserService.validationUser(token);
+
+    if (error) {
+      return res.status(404).json(data);
+    }
+
+    return res.status(200).json(data);
+  }
+
+  static async recoverPassword(req: Request, res: Response) {
+    const { email } = req.body;
+
+    const { error, data } = await UserService.recoverPassword(email);
+
+    if (error) {
+      return res.status(404).json(data);
+    }
+
+    return res.status(200).json(data);
+  }
+
+  static async updatePassword(req: Request, res: Response) {
+    const { password } = req.body;
+
+    if (!req.user) {
+      return res.status(401).json({
+        error: true,
+        message: "Usuario no autenticado.",
+      });
+    }
+
+    const email = req.user.email;
+
+    const { error, data } = await UserService.updatePassword(email, password);
 
     if (error) {
       return res.status(404).json(data);
