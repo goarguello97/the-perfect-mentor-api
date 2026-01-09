@@ -5,6 +5,7 @@ import { isAuth } from "src/middlewares/isAuth";
 const userRouter = Router();
 
 userRouter.get("/", UserController.getUsers);
+userRouter.get("/stats/info", UserController.getUserPerMonth);
 userRouter.post("/", UserController.addUser);
 userRouter.post("/login", UserController.loginUser);
 userRouter.get("/:id", UserController.getUserById);

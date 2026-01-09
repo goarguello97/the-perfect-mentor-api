@@ -25,6 +25,53 @@ import {
 dotenv.config();
 const EMAIL = process.env.EMAIL as string;
 class UserService {
+  static _formatYearlyReport(monthlyData: any, cumulative: any) {
+    const monthNames = [
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
+    ];
+
+    return monthNames.map((name, index) => {
+      const monthNumber = index + 1;
+
+      const mentorsThisMonth =
+        monthlyData.find(
+          (d: any) => d._id.month === monthNumber && d._id.role === "MENTOR"
+        )?.count || 0;
+      const menteesThisMonth =
+        monthlyData.find(
+          (d: any) => d._id.month === monthNumber && d._id.role === "MENTEE"
+        )?.count || 0;
+
+      cumulative.mentor += mentorsThisMonth;
+      cumulative.mentee += menteesThisMonth;
+
+      return {
+        month: name,
+        newUsers: {
+          mentor: mentorsThisMonth,
+          mentee: menteesThisMonth,
+          total: mentorsThisMonth + menteesThisMonth,
+        },
+        totalCumulative: {
+          mentor: cumulative.mentor,
+          mentee: cumulative.mentee,
+          grandTotal: cumulative.mentor + cumulative.mentee,
+        },
+      };
+    });
+  }
+
   static async getUsers(query: any) {
     const { verify, age, search, page = "1", isScrolling } = query;
 
@@ -64,6 +111,85 @@ class UserService {
       };
     } catch (error) {
       return { error: true, data: error };
+    }
+  }
+
+  static async getUserPerMonth() {
+    try {
+      const currentYear = new Date().getFullYear();
+      const startOfYear = new Date(`${currentYear}-01-01T00:00:00.000Z`);
+      const endOfYear = new Date(`${currentYear}-12-31T23:59:59.999Z`);
+
+      const baseStats = await User.aggregate([
+        { $match: { createdAt: { $lt: startOfYear } } },
+        {
+          $lookup: {
+            from: "roles",
+            localField: "role",
+            foreignField: "_id",
+            as: "roleData",
+          },
+        },
+        { $unwind: "$roleData" },
+        { $group: { _id: "$roleData.role", count: { $sum: 1 } } },
+      ]);
+
+      const cumulative = { mentor: 0, mentee: 0 } as any;
+      baseStats.forEach((stat) => {
+        if (stat._id && cumulative.hasOwnProperty(stat._id)) {
+          cumulative[stat._id] = stat.count;
+        }
+      });
+
+      const monthlyData = await User.aggregate([
+        {
+          $match: {
+            createdAt: { $gte: startOfYear, $lte: endOfYear },
+          },
+        },
+        {
+          $lookup: {
+            from: "roles",
+            localField: "role",
+            foreignField: "_id",
+            as: "roleData",
+          },
+        },
+        { $unwind: "$roleData" },
+        {
+          $group: {
+            _id: {
+              month: { $month: "$createdAt" },
+              role: "$roleData.role",
+            },
+            count: { $sum: 1 },
+          },
+        },
+      ]);
+
+      const formattedData = this._formatYearlyReport(monthlyData, cumulative);
+      const lastMonth = formattedData[11].totalCumulative;
+      const totalNewThisYear = formattedData.reduce(
+        (acc, month) => acc + month.newUsers.total,
+        0
+      );
+
+      return {
+        error: false,
+        data: {
+          months: formattedData,
+          summary: {
+            totalUsersAllTime: lastMonth.grandTotal, // Todos los usuarios en la DB
+            totalNewUsersThisYear: totalNewThisYear, // Solo los registrados en 2026
+            breakdownAllTime: {
+              mentors: lastMonth.mentor,
+              mentees: lastMonth.mentee,
+            },
+          },
+        },
+      };
+    } catch (error: any) {
+      return { error: true, data: error.message };
     }
   }
 
@@ -111,8 +237,6 @@ class UserService {
 
   static async putUser(user: any) {
     try {
-      // const updatedUser = await User.findByIdAndUpdate(user._id, user, { new: true });
-      console.log(user);
       const updatedUser = await User.findOneAndUpdate(
         { id: user.id },
         {
