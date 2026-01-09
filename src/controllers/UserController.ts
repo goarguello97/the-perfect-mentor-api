@@ -12,6 +12,14 @@ class UserController {
     res.status(200).json(data);
   }
 
+  static async getUserPerMonth(_: Request, res: Response) {
+    const { error, data } = await UserService.getUserPerMonth();
+
+    if (error) return res.status(400).json(error);
+
+    res.status(200).json(data);
+  }
+
   static async getUserById(req: Request, res: Response) {
     const { id } = req.params;
     const { error, data } = await UserService.getUserById(id);
