@@ -5,6 +5,7 @@ interface IUser {
   username: string;
   name: string;
   lastname: string;
+  fullname: string;
   country: string;
   date: string;
   email: string;
@@ -27,6 +28,7 @@ const UserSchema = new Schema<IUser>(
     username: { type: String, require: true, unique: true },
     name: { type: String },
     lastname: { type: String },
+    fullname: { type: String },
     country: String,
     date: String,
     email: { type: String, require: true, unique: true },

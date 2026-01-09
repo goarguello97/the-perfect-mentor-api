@@ -25,11 +25,43 @@ import {
 dotenv.config();
 const EMAIL = process.env.EMAIL as string;
 class UserService {
-  static async getUsers() {
-    try {
-      const response = await User.find({});
+  static async getUsers(query: any) {
+    const { verify, age, search, page = "1", isScrolling } = query;
 
-      return { error: false, data: response };
+    const LIMIT = 7;
+    const currentPage = Math.max(Number(page), 1);
+    const filters: any = {};
+    const sort: any = {};
+    if (verify === "true") {
+      filters.verify = true;
+    }
+    if (search) filters.name = { $regex: search, $options: "i" };
+    if (age === "true") {
+      sort.date = 1;
+    }
+    try {
+      const users = await User.find(filters)
+        .sort(sort)
+        .skip((currentPage - 1) * LIMIT)
+        .limit(LIMIT)
+        .populate("role", {
+          role: 1,
+          _id: 0,
+        });
+
+      const total = await User.countDocuments(filters);
+
+      return {
+        error: false,
+        data: {
+          users,
+          page: currentPage,
+          perPage: LIMIT,
+          total,
+          totalPages: Math.ceil(total / LIMIT),
+          isScrolling: isScrolling === "true" || isScrolling === true,
+        },
+      };
     } catch (error) {
       return { error: true, data: error };
     }
@@ -49,7 +81,7 @@ class UserService {
     try {
       const { email, username, id } = user;
 
-      const userByEmail = await User.find({ where: { email } });
+      const userByEmail = await User.find({ email });
 
       if (userByEmail.length > 0)
         throw new Error(`El email ${email} ya se encuentra en uso.`);
@@ -103,7 +135,7 @@ class UserService {
 
       const payload = validateToken(token);
 
-      const user = await User.findOne({ payload });
+      const user = await User.findOne({ email: payload.user.email });
 
       if (!user) throw new Error("Usuario no disponible.");
 
@@ -227,7 +259,10 @@ class UserService {
 
       return {
         error: false,
-        data: { message: "Se ha enviado un email de recuperación, revise su bandeja de entrada por favor." },
+        data: {
+          message:
+            "Se ha enviado un email de recuperación, revise su bandeja de entrada por favor.",
+        },
       };
     } catch (error: any) {
       return { error: true, data: error.message };
