@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 
 class UserController {
   static async getUsers(req: Request, res: Response) {
-    const {query} = req
+    const { query } = req;
     const { error, data } = await UserService.getUsers(query);
 
     if (error) return res.status(400).json(error);
@@ -30,7 +30,7 @@ class UserController {
   static async putUser(req: Request, res: Response) {
     const { id } = req.params;
     const user = req.body;
-    const { error, data } = await UserService.putUser(id, user);
+    const { error, data } = await UserService.putUser({ ...user, id });
     if (error) return res.status(404).json(data);
 
     return res.status(200).json(data);
