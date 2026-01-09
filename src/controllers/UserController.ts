@@ -3,8 +3,9 @@ import UserService from "@services/UserService";
 import { Request, Response } from "express";
 
 class UserController {
-  static async getUsers(_: Request, res: Response) {
-    const { error, data } = await UserService.getUsers();
+  static async getUsers(req: Request, res: Response) {
+    const {query} = req
+    const { error, data } = await UserService.getUsers(query);
 
     if (error) return res.status(400).json(error);
 
