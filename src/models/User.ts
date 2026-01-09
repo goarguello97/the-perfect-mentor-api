@@ -17,6 +17,7 @@ interface IUser {
   matchSend: Types.ObjectId[];
   match: Types.ObjectId[];
   verify: boolean;
+  isComplete: boolean;
   skills: string[];
   avatar: Types.ObjectId;
   recoveryToken: string;
@@ -40,6 +41,7 @@ const UserSchema = new Schema<IUser>(
     matchSend: [{ type: Schema.Types.ObjectId, ref: "User" }],
     match: [{ type: Schema.Types.ObjectId, ref: "User" }],
     verify: { type: Boolean, default: false },
+    isComplete: { type: Boolean, default: false },
     skills: [String],
     avatar: {
       type: Schema.Types.ObjectId,

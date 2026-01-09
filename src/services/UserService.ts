@@ -37,7 +37,7 @@ class UserService {
     }
     if (search) filters.name = { $regex: search, $options: "i" };
     if (age === "true") {
-      sort.date = 1;
+      sort.date = -1;
     }
     try {
       const users = await User.find(filters)
@@ -109,9 +109,21 @@ class UserService {
     }
   }
 
-  static async putUser(id: string, user: any) {
+  static async putUser(user: any) {
     try {
-      const updatedUser = await User.findByIdAndUpdate(id, user, { new: true });
+      // const updatedUser = await User.findByIdAndUpdate(user._id, user, { new: true });
+      console.log(user);
+      const updatedUser = await User.findOneAndUpdate(
+        { id: user.id },
+        {
+          ...user,
+          fullname: `${user.name} ${user.lastname}`,
+          isComplete: true,
+        },
+        {
+          new: true,
+        }
+      );
       if (!updatedUser) throw new Error("Usuario no disponible.");
       return { error: false, data: updatedUser };
     } catch (error) {
