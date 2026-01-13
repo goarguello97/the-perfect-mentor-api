@@ -3,7 +3,9 @@ import { Router } from "express";
 
 const matchRouter = Router();
 
-matchRouter.post("/send", MatchController.match);
-matchRouter.post("/response", MatchController.responseMatch);
+matchRouter.post("/", MatchController.match);
+matchRouter.patch("/:receiverId", MatchController.responseMatch);
+matchRouter.get("/:token", MatchController.getMatches);
+matchRouter.get("/req/:token", MatchController.getMatchesRequest);
 
 export default matchRouter;
