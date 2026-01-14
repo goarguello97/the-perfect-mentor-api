@@ -1,12 +1,18 @@
+import { socketService } from "@services/SocketService";
 import cors from "cors";
 import express from "express";
+import { createServer } from "http";
 import morgan from "morgan";
 import createRoles from "./config/createRoles";
 import connectDb from "./db";
 import router from "./routes/index.routes";
 
 const app = express();
+const httpServer = createServer(app);
+
 const PORT = process.env.PORT || 3000;
+
+socketService.init(httpServer);
 
 app.use(
   cors({
@@ -41,7 +47,7 @@ app.get("/", (_, res) => {
 
 app.use("/api", router);
 
-app.listen(PORT, () => {
+httpServer.listen(PORT, () => {
   return console.log(`Servidor escuchando en puerto ${PORT} `);
 });
 

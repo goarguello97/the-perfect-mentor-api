@@ -4,8 +4,10 @@ import { Request, Response } from "express";
 class MatchController {
   static async match(req: Request, res: Response) {
     const { senderId, receiverId } = req.body;
-
-    const { error, data } = await MatchService.match({ senderId, receiverId });
+    const { error, data } = await MatchService.match({
+      senderId,
+      receiverId,
+    });
 
     if (error) return res.status(404).json(data);
 
