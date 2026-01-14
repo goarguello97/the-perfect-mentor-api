@@ -1,6 +1,7 @@
 import Match, { MatchStatus } from "@models/Match";
 import User from "@models/User";
 import admin from "../firebase/firebase-admin";
+import { socketService } from "./SocketService";
 
 class MatchService {
   static async match(data: { senderId: string; receiverId: string }) {
@@ -26,9 +27,17 @@ class MatchService {
 
       await newMatch.save();
 
+      socketService.io.to(receiverId.toString()).emit("NEW_FRIEND_REQUEST", {
+        from: senderUser.fullname,
+        senderId: senderId,
+      });
+
       return { error: false, message: "Solicitud enviada." };
     } catch (error) {
-      return { error: true, data: error };
+      return {
+        error: true,
+        data: error instanceof Error ? error.message : error,
+      };
     }
   }
 
@@ -62,6 +71,13 @@ class MatchService {
       if (response) {
         match.status = MatchStatus.ACCEPTED;
         await match.save();
+
+        socketService.io
+          .to(match.senderId.toString())
+          .emit("REQUEST_ACCEPTED", {
+            friendId: match.receiverId,
+            friendName: receiverUser.fullname,
+          });
       } else {
         await Match.deleteOne({ _id: match._id });
         return {
