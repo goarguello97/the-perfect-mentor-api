@@ -15,6 +15,19 @@ class MdController {
 
     return res.status(201).json(data);
   }
+
+  static async getMessages(req: Request, res: Response) {
+    const { receiverId, senderId } = req.query;
+
+    const { error, data } = await MdService.getMessages({
+      receiverId: receiverId as string,
+      senderId: senderId as string,
+    });
+
+    if (error) return res.status(404).json(data);
+
+    return res.status(200).json(data);
+  }
 }
 
 export default MdController;
