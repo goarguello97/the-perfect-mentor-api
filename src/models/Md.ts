@@ -10,10 +10,10 @@ interface IMd {
 
 const MdSchema = new Schema<IMd>(
   {
-    senderId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    receiverId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    content: { type: String, require: true },
-    read: { type: Boolean, require: false },
+    senderId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true},
+    receiverId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true},
+    content: { type: String, required: true, trim: true },
+    read: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false }
 );

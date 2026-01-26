@@ -5,5 +5,6 @@ const mdRouter = Router();
 
 mdRouter.post("/", MdController.sendMessage);
 mdRouter.get("/", MdController.getMessages);
+mdRouter.get("/:userId", MdController.getUserMessages);
 
 export default mdRouter;
