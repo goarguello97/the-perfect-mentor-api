@@ -11,6 +11,14 @@ class ReportController{
         
         return res.status(200).json(data)
     }
+    
+    static async getReport(req: Request, res: Response) {        
+        const { id } = req.params;
+        const { error, data } = await ReportService.getReport({id})
+        if (error) return res.status(400).json(data)
+        
+        return res.status(200).json(data)
+    }
 
     static async addReport(req: Request, res: Response) {
         const { senderId, receiverId, content, issue } = req.body
