@@ -1,6 +1,6 @@
 /// <reference types="../types/express" />
-import UserService from "@services/UserService";
-import { Request, Response } from "express";
+import UserService from '@services/UserService';
+import { Request, Response } from 'express';
 
 class UserController {
   static async getUsers(req: Request, res: Response) {
@@ -54,7 +54,7 @@ class UserController {
   }
 
   static async activateUser(req: Request, res: Response) {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.headers.authorization?.split(' ')[1];
 
     const { error, data } = await UserService.activateUser(token);
     if (error) {
@@ -68,7 +68,7 @@ class UserController {
     const file = req.file;
     const { id } = req.body;
 
-    if (!file) throw new Error("No ingreso una foto.");
+    if (!file) throw new Error('No ingreso una foto.');
 
     const { error, data } = await UserService.addAvatar(file, id);
 
@@ -91,7 +91,7 @@ class UserController {
   }
 
   static async validationUser(req: Request, res: Response) {
-    const token = req.headers.authorization?.split(" ")[1];
+    const token = req.headers.authorization?.split(' ')[1];
 
     const { error, data } = await UserService.validationUser(token);
 
@@ -120,7 +120,7 @@ class UserController {
     if (!req.user) {
       return res.status(401).json({
         error: true,
-        message: "Usuario no autenticado.",
+        message: 'Usuario no autenticado.',
       });
     }
 

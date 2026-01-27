@@ -1,4 +1,4 @@
-import { model, Schema } from "mongoose";
+import { model, Schema } from 'mongoose';
 
 interface IAvatar {
   title: string;
@@ -13,7 +13,7 @@ const AvatarSchema = new Schema<IAvatar>(
   {
     timestamps: true,
     versionKey: false,
-  }
+  },
 );
 
-export default model("Avatar", AvatarSchema);
+export default model('Avatar', AvatarSchema);

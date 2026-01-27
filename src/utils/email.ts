@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
-import nodemailer from "nodemailer";
+import dotenv from 'dotenv';
+import nodemailer from 'nodemailer';
 
 dotenv.config();
 
@@ -8,7 +8,7 @@ const PASS = process.env.PASS as string;
 const URL = process.env.URL as string;
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: 'smtp.gmail.com',
   port: 465,
   secure: true,
   auth: {

@@ -1,5 +1,5 @@
-import RoleService from "@services/RoleService";
-import { Request, Response } from "express";
+import RoleService from '@services/RoleService';
+import { Request, Response } from 'express';
 
 class RoleController {
   static async getRoles(req: Request, res: Response) {

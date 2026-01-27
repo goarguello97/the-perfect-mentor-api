@@ -1,5 +1,5 @@
-import MdService from "@services/MdService";
-import { Request, Response } from "express";
+import MdService from '@services/MdService';
+import { Request, Response } from 'express';
 
 class MdController {
   static async sendMessage(req: Request, res: Response) {
@@ -19,8 +19,10 @@ class MdController {
   static async getUserMessages(req: Request, res: Response) {
     const { userId } = req.params;
 
-    const { error, data } = await MdService.getUserMessages({ userId: userId as string })
-         
+    const { error, data } = await MdService.getUserMessages({
+      userId: userId as string,
+    });
+
     if (error) return res.status(404).json(data);
 
     return res.status(200).json(data);

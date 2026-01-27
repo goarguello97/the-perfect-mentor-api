@@ -1,22 +1,22 @@
-import User from "@models/User";
-import { NextFunction, Request, Response } from "express";
-import { validateToken } from "../config/token";
+import User from '@models/User';
+import { NextFunction, Request, Response } from 'express';
+import { validateToken } from '../config/token';
 
 export const isAuth = async (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({
       error: true,
-      message: "Acceso denegado: Token no proporcionado o incorrecto.",
+      message: 'Acceso denegado: Token no proporcionado o incorrecto.',
     });
   }
 
-  const token = authHeader.split("Bearer ")[1];
+  const token = authHeader.split('Bearer ')[1];
 
   try {
     const decodedToken = validateToken(token);
@@ -28,7 +28,7 @@ export const isAuth = async (
     if (!user)
       return res.status(401).json({
         error: true,
-        message: "Acceso denegado: Token no proporcionado o incorrecto.",
+        message: 'Acceso denegado: Token no proporcionado o incorrecto.',
       });
 
     req.user = { email };
@@ -37,7 +37,7 @@ export const isAuth = async (
   } catch (error) {
     return res.status(401).json({
       error: true,
-      message: "Token inválido o expirado.",
+      message: 'Token inválido o expirado.',
     });
   }
 };

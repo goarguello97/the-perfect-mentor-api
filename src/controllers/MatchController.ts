@@ -1,5 +1,5 @@
-import MatchService from "@services/MatchService";
-import { Request, Response } from "express";
+import MatchService from '@services/MatchService';
+import { Request, Response } from 'express';
 
 class MatchController {
   static async match(req: Request, res: Response) {

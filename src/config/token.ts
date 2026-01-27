@@ -1,5 +1,5 @@
-import dotenv from "dotenv";
-import jwt from "jsonwebtoken";
+import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 
 dotenv.config();
 
@@ -10,12 +10,12 @@ interface TokenPayload {
 }
 
 export function generateTokenRegister(payload: { email: string }) {
-  const token = jwt.sign({ user: payload }, SECRET, { expiresIn: "1h" });
+  const token = jwt.sign({ user: payload }, SECRET, { expiresIn: '1h' });
   return token;
 }
 
 export function generateTokenRecoverPassword(payload: { email: string }) {
-  const token = jwt.sign({ user: payload }, SECRET, { expiresIn: "10h" });
+  const token = jwt.sign({ user: payload }, SECRET, { expiresIn: '10h' });
   return token;
 }
 
