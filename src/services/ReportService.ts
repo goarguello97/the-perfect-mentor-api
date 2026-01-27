@@ -42,6 +42,31 @@ class ReportService {
         }
     }
 
+    static async getReport(data:{id:string}){
+        try {
+            const {id} = data
+
+            if(!id) throw new Error("Id del reporte inválido") 
+
+            const report = await Report.findById(id).populate({
+                path: 'senderId',
+                populate: {
+                    path: 'role' 
+                }
+            })
+            .populate({
+                path: 'receiverId',
+                populate: {
+                    path: 'role'
+                }
+            });
+
+            return {error:false, data:report}
+        } catch (error) {
+            return {error:true, data:error}
+        }
+    }
+
     static async addReport(data: {senderId:string, receiverId:string, content:string, issue:string}) {
         try {
             const {senderId, receiverId, content, issue} = data;
@@ -102,7 +127,7 @@ class ReportService {
 
             if (!report) throw new Error("Reporte inexistente")
 
-            report.answered = true;
+            report.answered = !report.answered;
 
             await report.save();
 
