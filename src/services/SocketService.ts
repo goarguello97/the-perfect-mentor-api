@@ -1,6 +1,6 @@
-import dotenv from "dotenv";
-import { Server as HttpServer } from "http";
-import { Socket, Server as SocketIOServer } from "socket.io";
+import dotenv from 'dotenv';
+import { Server as HttpServer } from 'http';
+import { Socket, Server as SocketIOServer } from 'socket.io';
 
 dotenv.config();
 
@@ -11,11 +11,11 @@ class SocketService {
     this._io = new SocketIOServer(httpServer, {
       cors: {
         origin: process.env.ORIGIN,
-        methods: ["GET", "POST"],
+        methods: ['GET', 'POST'],
       },
     });
 
-    this._io.on("connection", (socket: Socket) => {
+    this._io.on('connection', (socket: Socket) => {
       const userId = socket.handshake.query.userId as string;
 
       if (userId) {
@@ -23,7 +23,7 @@ class SocketService {
         console.log(`Usuario ${userId} conectado y unido a su sala`);
       }
 
-      socket.on("disconnect", () => {
+      socket.on('disconnect', () => {
         console.log(`Usuario ${userId} desconectado`);
       });
     });
@@ -33,7 +33,7 @@ class SocketService {
 
   public get io(): SocketIOServer {
     if (!this._io) {
-      throw new Error("Socket.io no ha sido inicializado");
+      throw new Error('Socket.io no ha sido inicializado');
     }
 
     return this._io;

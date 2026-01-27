@@ -1,44 +1,44 @@
-import Avatar from "@models/Avatar";
-import Role from "@models/Role";
-import User from "@models/User";
-import dotenv from "dotenv";
+import Avatar from '@models/Avatar';
+import Role from '@models/Role';
+import User from '@models/User';
+import dotenv from 'dotenv';
 import {
   deleteObject,
   getDownloadURL,
   getStorage,
   ref,
   uploadBytesResumable,
-} from "firebase/storage";
-import path from "path";
+} from 'firebase/storage';
+import path from 'path';
 import {
   generateTokenRecoverPassword,
   generateTokenRegister,
   validateToken,
-} from "src/config/token";
-import admin from "src/firebase/firebase-admin";
+} from 'src/config/token';
+import admin from 'src/firebase/firebase-admin';
 import {
   getTemplate,
   getTemplateRecoverPassword,
   transporter,
-} from "src/utils/email";
+} from 'src/utils/email';
 
 dotenv.config();
 const EMAIL = process.env.EMAIL as string;
 class UserService {
   static _formatYearlyReport(monthlyData: any, cumulative: any) {
     const monthNames = [
-      "Enero",
-      "Febrero",
-      "Marzo",
-      "Abril",
-      "Mayo",
-      "Junio",
-      "Julio",
-      "Agosto",
-      "Septiembre",
-      "Octubre",
-      "Noviembre",
-      "Diciembre",
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
     ];
 
     return monthNames.map((name, index) => {
@@ -46,11 +46,11 @@ class UserService {
 
       const mentorsThisMonth =
         monthlyData.find(
-          (d: any) => d._id.month === monthNumber && d._id.role === "MENTOR"
+          (d: any) => d._id.month === monthNumber && d._id.role === 'MENTOR',
         )?.count || 0;
       const menteesThisMonth =
         monthlyData.find(
-          (d: any) => d._id.month === monthNumber && d._id.role === "MENTEE"
+          (d: any) => d._id.month === monthNumber && d._id.role === 'MENTEE',
         )?.count || 0;
 
       cumulative.mentor += mentorsThisMonth;
@@ -73,17 +73,17 @@ class UserService {
   }
 
   static async getUsers(query: any) {
-    const { verify, age, search, page = "1", isScrolling } = query;
+    const { verify, age, search, page = '1', isScrolling } = query;
 
     const LIMIT = 7;
     const currentPage = Math.max(Number(page), 1);
     const filters: any = {};
     const sort: any = {};
-    if (verify === "true") {
+    if (verify === 'true') {
       filters.verify = true;
     }
-    if (search) filters.name = { $regex: search, $options: "i" };
-    if (age === "true") {
+    if (search) filters.name = { $regex: search, $options: 'i' };
+    if (age === 'true') {
       sort.date = -1;
     }
     try {
@@ -91,7 +91,7 @@ class UserService {
         .sort(sort)
         .skip((currentPage - 1) * LIMIT)
         .limit(LIMIT)
-        .populate("role", {
+        .populate('role', {
           role: 1,
           _id: 0,
         });
@@ -106,7 +106,7 @@ class UserService {
           perPage: LIMIT,
           total,
           totalPages: Math.ceil(total / LIMIT),
-          isScrolling: isScrolling === "true" || isScrolling === true,
+          isScrolling: isScrolling === 'true' || isScrolling === true,
         },
       };
     } catch (error) {
@@ -124,14 +124,14 @@ class UserService {
         { $match: { createdAt: { $lt: startOfYear } } },
         {
           $lookup: {
-            from: "roles",
-            localField: "role",
-            foreignField: "_id",
-            as: "roleData",
+            from: 'roles',
+            localField: 'role',
+            foreignField: '_id',
+            as: 'roleData',
           },
         },
-        { $unwind: "$roleData" },
-        { $group: { _id: "$roleData.role", count: { $sum: 1 } } },
+        { $unwind: '$roleData' },
+        { $group: { _id: '$roleData.role', count: { $sum: 1 } } },
       ]);
 
       const cumulative = { mentor: 0, mentee: 0 } as any;
@@ -149,18 +149,18 @@ class UserService {
         },
         {
           $lookup: {
-            from: "roles",
-            localField: "role",
-            foreignField: "_id",
-            as: "roleData",
+            from: 'roles',
+            localField: 'role',
+            foreignField: '_id',
+            as: 'roleData',
           },
         },
-        { $unwind: "$roleData" },
+        { $unwind: '$roleData' },
         {
           $group: {
             _id: {
-              month: { $month: "$createdAt" },
-              role: "$roleData.role",
+              month: { $month: '$createdAt' },
+              role: '$roleData.role',
             },
             count: { $sum: 1 },
           },
@@ -171,7 +171,7 @@ class UserService {
       const lastMonth = formattedData[11].totalCumulative;
       const totalNewThisYear = formattedData.reduce(
         (acc, month) => acc + month.newUsers.total,
-        0
+        0,
       );
 
       return {
@@ -212,7 +212,7 @@ class UserService {
       if (userByEmail.length > 0)
         throw new Error(`El email ${email} ya se encuentra en uso.`);
 
-      const role = await Role.findOne({ role: "MENTEE" });
+      const role = await Role.findOne({ role: 'MENTEE' });
 
       const newUser = new User({ email, username, id, role });
 
@@ -222,8 +222,8 @@ class UserService {
       await transporter.sendMail({
         from: `The Perfect Mentor <${EMAIL}>`,
         to: email,
-        subject: "Verificar cuenta",
-        text: "...",
+        subject: 'Verificar cuenta',
+        text: '...',
         html: template,
       });
 
@@ -246,9 +246,9 @@ class UserService {
         },
         {
           new: true,
-        }
+        },
       );
-      if (!updatedUser) throw new Error("Usuario no disponible.");
+      if (!updatedUser) throw new Error('Usuario no disponible.');
       return { error: false, data: updatedUser };
     } catch (error) {
       return { error: true, data: error };
@@ -267,13 +267,13 @@ class UserService {
 
   static async activateUser(token: string | undefined) {
     try {
-      if (!token) throw new Error("Token no definido");
+      if (!token) throw new Error('Token no definido');
 
       const payload = validateToken(token);
 
       const user = await User.findOne({ email: payload.user.email });
 
-      if (!user) throw new Error("Usuario no disponible.");
+      if (!user) throw new Error('Usuario no disponible.');
 
       user.verify = true;
 
@@ -289,18 +289,18 @@ class UserService {
 
   static async addAvatar(file: Express.Multer.File, id: string) {
     try {
-      if (!file) throw new Error("Archivo inexistente.");
+      if (!file) throw new Error('Archivo inexistente.');
 
-      const user = await User.findById(id).populate("avatar", { imageUrl: 1 });
+      const user = await User.findById(id).populate('avatar', { imageUrl: 1 });
 
-      if (!user) throw new Error("Usuario inexistente.");
+      if (!user) throw new Error('Usuario inexistente.');
 
       if (user.avatar) {
         const oldAvatar = await Avatar.findById(user.avatar._id);
 
-        if (!oldAvatar) throw new Error("Avatar inexistente.");
+        if (!oldAvatar) throw new Error('Avatar inexistente.');
 
-        if (oldAvatar.title !== "default") {
+        if (oldAvatar.title !== 'default') {
           const fileToRemove = ref(getStorage(), `avatars/${oldAvatar.title}`);
           await Promise.all([
             deleteObject(fileToRemove),
@@ -320,7 +320,7 @@ class UserService {
       const snapshot = await uploadBytesResumable(
         storageRef,
         file.buffer!,
-        metadata
+        metadata,
       );
 
       const downloadUrl = await getDownloadURL(snapshot.ref);
@@ -354,18 +354,18 @@ class UserService {
 
   static async validationUser(token: string | undefined) {
     try {
-      if (!token) throw new Error("Token no definido");
+      if (!token) throw new Error('Token no definido');
 
       const decodedToken = await admin.auth().verifyIdToken(token);
       const { uid } = decodedToken;
 
-      const user = await User.findOne({ id: uid }).populate("role", {
+      const user = await User.findOne({ id: uid }).populate('role', {
         role: 1,
         _id: 0,
       });
 
-      if (!user) throw new Error("Usuario no registrado.");
-      if (!user.verify) throw new Error("Debes activar tu usuario.");
+      if (!user) throw new Error('Usuario no registrado.');
+      if (!user.verify) throw new Error('Debes activar tu usuario.');
 
       return { error: false, data: user };
     } catch (error: any) {
@@ -377,7 +377,7 @@ class UserService {
     try {
       const user = await User.findOne({ email });
 
-      if (!user) throw new Error("Usuario no válido.");
+      if (!user) throw new Error('Usuario no válido.');
 
       const token = generateTokenRecoverPassword({ email: user.email });
       const template = getTemplateRecoverPassword(user.username, token);
@@ -385,8 +385,8 @@ class UserService {
       await transporter.sendMail({
         from: `The Perfect Mentor <${EMAIL}>`,
         to: email,
-        subject: "Recuperar contraseña",
-        text: "...",
+        subject: 'Recuperar contraseña',
+        text: '...',
         html: template,
       });
 
@@ -397,7 +397,7 @@ class UserService {
         error: false,
         data: {
           message:
-            "Se ha enviado un email de recuperación, revise su bandeja de entrada por favor.",
+            'Se ha enviado un email de recuperación, revise su bandeja de entrada por favor.',
         },
       };
     } catch (error: any) {
@@ -409,15 +409,15 @@ class UserService {
     try {
       const user = await User.findOne({ email });
 
-      if (!user) throw new Error("Usuario no válido.");
+      if (!user) throw new Error('Usuario no válido.');
 
-      user.recoveryToken = "";
+      user.recoveryToken = '';
       await user.save();
       await admin.auth().updateUser(user.id, { password });
 
       return {
         error: false,
-        data: { message: "Contraseña modificada exitosamente." },
+        data: { message: 'Contraseña modificada exitosamente.' },
       };
     } catch (error: any) {
       return { error: true, data: error.message };
