@@ -22,7 +22,7 @@ class UserController {
 
   static async getUserById(req: Request, res: Response) {
     const { id } = req.params;
-    const { error, data } = await UserService.getUserById(id);
+    const { error, data } = await UserService.getUserById({ id });
     if (error) return res.status(404).json(data);
 
     res.status(200).json(data);

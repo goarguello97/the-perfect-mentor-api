@@ -193,9 +193,13 @@ class UserService {
     }
   }
 
-  static async getUserById(id: string) {
+  static async getUserById(data: { id: string }) {
     try {
-      const response = await User.findOne({ where: { id } });
+      const { id } = data;
+
+      if (!id) throw new Error('Id del usuario inválido');
+
+      const response = await User.findById(id).populate('role');
 
       return { error: false, data: response };
     } catch (error) {
@@ -237,19 +241,37 @@ class UserService {
 
   static async putUser(user: any) {
     try {
-      const updatedUser = await User.findOneAndUpdate(
-        { id: user.id },
+      let userToUpdate = await User.findById(user._id).populate('role', {
+        role: 1,
+        _id: 1,
+      });
+      let customToken = '';
+
+      if (!userToUpdate) throw new Error('Usuario no disponible.');
+
+      if (user.email) {
+        if (user.email !== userToUpdate.email) {
+          await admin.auth().updateUser(userToUpdate.id, {
+            email: user.email,
+          });
+          customToken = await admin.auth().createCustomToken(userToUpdate.id);
+        }
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(
+        userToUpdate._id,
         {
           ...user,
           fullname: `${user.name} ${user.lastname}`,
           isComplete: true,
         },
-        {
-          new: true,
-        },
-      );
-      if (!updatedUser) throw new Error('Usuario no disponible.');
-      return { error: false, data: updatedUser };
+        { new: true },
+      ).populate('role', {
+        role: 1,
+        _id: 1,
+      });
+
+      return { error: false, data: { ...updatedUser, customToken } };
     } catch (error) {
       return { error: true, data: error };
     }
@@ -361,7 +383,7 @@ class UserService {
 
       const user = await User.findOne({ id: uid }).populate('role', {
         role: 1,
-        _id: 0,
+        _id: 1,
       });
 
       if (!user) throw new Error('Usuario no registrado.');
