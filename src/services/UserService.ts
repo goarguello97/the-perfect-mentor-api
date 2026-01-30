@@ -9,6 +9,7 @@ import {
   ref,
   uploadBytesResumable,
 } from 'firebase/storage';
+import { v2 as cloudinary } from 'cloudinary';
 import path from 'path';
 import {
   generateTokenRecoverPassword,
@@ -323,42 +324,24 @@ class UserService {
         if (!oldAvatar) throw new Error('Avatar inexistente.');
 
         if (oldAvatar.title !== 'default') {
-          const fileToRemove = ref(getStorage(), `avatars/${oldAvatar.title}`);
           await Promise.all([
-            deleteObject(fileToRemove),
+            cloudinary.uploader.destroy(oldAvatar.publicId),
             oldAvatar.deleteOne(),
           ]);
         }
       }
 
-      const fileName = id + path.extname(file.originalname);
-
-      const storageRef = ref(getStorage(), `avatars/${fileName}`);
-
-      const metadata = {
-        contentType: file.mimetype,
-      };
-
-      const snapshot = await uploadBytesResumable(
-        storageRef,
-        file.buffer!,
-        metadata,
-      );
-
-      const downloadUrl = await getDownloadURL(snapshot.ref);
-
-      const newAvatar = {
-        title: fileName,
-        imageUrl: downloadUrl,
-      };
-
-      const avatar = new Avatar(newAvatar);
+      const avatar = new Avatar({
+        title: path.parse(file.originalname).name,
+        imageUrl: file.path,
+        publicId: file.filename,
+      });
       await avatar.save();
 
       user.avatar = avatar._id;
       await user.save();
 
-      return { error: false, data: user };
+      return { error: false, data: { ...user, avatar } };
     } catch (error) {
       return { error: true, data: error };
     }
@@ -381,10 +364,12 @@ class UserService {
       const decodedToken = await admin.auth().verifyIdToken(token);
       const { uid } = decodedToken;
 
-      const user = await User.findOne({ id: uid }).populate('role', {
-        role: 1,
-        _id: 1,
-      });
+      const user = await User.findOne({ id: uid })
+        .populate('role', {
+          role: 1,
+          _id: 1,
+        })
+        .populate('avatar');
 
       if (!user) throw new Error('Usuario no registrado.');
       if (!user.verify) throw new Error('Debes activar tu usuario.');

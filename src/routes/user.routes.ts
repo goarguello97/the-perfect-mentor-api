@@ -1,7 +1,8 @@
 import UserController from '@controllers/UserController';
 import { Router } from 'express';
 import multer from 'multer';
-import { isAuth } from 'src/middlewares/isAuth';
+import uploadCloud from '../config/cloudinaryConfig';
+import { isAuth } from '../middlewares/isAuth';
 const userRouter = Router();
 
 userRouter.get('/', UserController.getUsers);
@@ -14,7 +15,7 @@ userRouter.delete('/:id', UserController.deleteUser);
 userRouter.get('/auth/activate', UserController.activateUser);
 userRouter.patch(
   '/add/avatar',
-  multer({ storage: multer.memoryStorage() }).single('image'),
+  uploadCloud.single('image'),
   UserController.addAvatar,
 );
 userRouter.get('/auth/validate', UserController.validationUser);
