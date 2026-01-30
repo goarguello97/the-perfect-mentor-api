@@ -45,7 +45,7 @@ const UserSchema = new Schema<IUser>(
     skills: [String],
     avatar: {
       type: Schema.Types.ObjectId,
-      ref: 'Photo',
+      ref: 'Avatar',
     },
     recoveryToken: { type: String, default: '' },
   },
