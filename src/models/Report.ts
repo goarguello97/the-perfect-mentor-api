@@ -3,9 +3,9 @@ import { model, Schema, Types } from 'mongoose';
 interface IReport {
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
-  content: string;
-  issue: string;
-  answered: boolean;
+  subject: string;
+  status: boolean;
+  lastMessageAt: Date;
   createdAt: Date;
 }
 
@@ -23,9 +23,9 @@ const ReportSchema = new Schema<IReport>(
       required: true,
       index: true,
     },
-    content: { type: String, required: true, trim: true },
-    issue: { type: String, required: true, trim: true },
-    answered: { type: Boolean, default: false },
+    lastMessageAt: { type: Date, default: Date.now },
+    subject: { type: String, required: true, trim: true },
+    status: { type: Boolean, default: false },
   },
   { timestamps: true, versionKey: false },
 );

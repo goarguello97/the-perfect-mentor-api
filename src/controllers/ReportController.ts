@@ -20,13 +20,13 @@ class ReportController {
   }
 
   static async addReport(req: Request, res: Response) {
-    const { senderId, receiverId, content, issue } = req.body;
+    const { senderId, receiverId, content, subject } = req.body;
 
     const { error, data } = await ReportService.addReport({
       senderId,
       receiverId,
       content,
-      issue,
+      subject,
     });
 
     if (error) return res.status(400).json(data);
@@ -35,14 +35,14 @@ class ReportController {
 
   static async putReport(req: Request, res: Response) {
     const { reportId } = req.params;
-    const { senderId, receiverId, content, answered } = req.body;
+    const { senderId, receiverId, content, status } = req.body;
 
     const { error, data } = await ReportService.putReport({
       _id: reportId,
       senderId,
       receiverId,
       content,
-      answered,
+      status,
     });
 
     if (error) return res.status(400).json(data);
@@ -53,6 +53,20 @@ class ReportController {
   static async answerReport(req: Request, res: Response) {
     const { reportId } = req.params;
     const { error, data } = await ReportService.answerReport({ _id: reportId });
+
+    if (error) return res.status(400).json(data);
+
+    return res.status(200).json(data);
+  }
+
+  static async addReportMessage(req: Request, res: Response) {
+    const { reportId, authorId, content } = req.body;
+
+    const { error, data } = await ReportService.addReportMessage({
+      reportId,
+      authorId,
+      content,
+    });
 
     if (error) return res.status(400).json(data);
 
