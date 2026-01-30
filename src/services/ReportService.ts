@@ -1,6 +1,7 @@
 import Report from '@models/Report';
 import User from '@models/User';
 import admin from '../firebase/firebase-admin';
+import ReportMessage from '@models/ReportMessage';
 
 class ReportService {
   static async getReports(data: { token: string }) {
@@ -62,7 +63,16 @@ class ReportService {
           },
         });
 
-      return { error: false, data: report };
+      if (!report) throw new Error('Reporte inexistente');
+
+      const reportData = report.toObject();
+
+      const reportMessages = await ReportMessage.find({ reportId: report._id });
+
+      return {
+        error: false,
+        data: { ...reportData, messages: reportMessages },
+      };
     } catch (error) {
       return { error: true, data: error };
     }
@@ -72,10 +82,10 @@ class ReportService {
     senderId: string;
     receiverId: string;
     content: string;
-    issue: string;
+    subject: string;
   }) {
     try {
-      const { senderId, receiverId, content, issue } = data;
+      const { senderId, receiverId, content, subject } = data;
 
       if (!senderId) throw new Error('Id del emisor requerido');
 
@@ -95,13 +105,19 @@ class ReportService {
       const report = new Report({
         senderId: senderUser._id,
         receiverId: receiverUser._id,
+        subject,
+      });
+
+      const reportMessage = new ReportMessage({
+        authorId: senderUser._id,
+        reportId: report._id,
         content,
-        issue,
       });
 
       await report.save();
+      await reportMessage.save();
 
-      return { error: false, data: report };
+      return { error: false, data: { report, reportMessage } };
     } catch (error) {
       return { error: true, data: error };
     }
@@ -112,19 +128,15 @@ class ReportService {
     senderId: string;
     receiverId: string;
     content: string;
-    answered: boolean;
+    status: boolean;
   }) {
     try {
       let report = await Report.findById(data._id);
 
       if (!report) throw new Error('Reporte inexistente');
 
-      if (report.content) {
-        report.content = data.content;
-      }
-
-      if (data.answered) {
-        report.answered = data.answered;
+      if (data.status) {
+        report.status = data.status;
       }
 
       await report.save();
@@ -141,11 +153,27 @@ class ReportService {
 
       if (!report) throw new Error('Reporte inexistente');
 
-      report.answered = !report.answered;
+      report.status = !report.status;
 
       await report.save();
 
       return { error: false, data: report };
+    } catch (error) {
+      return { error: true, data: error };
+    }
+  }
+
+  static async addReportMessage(data: {
+    authorId: string;
+    reportId: string;
+    content: string;
+  }) {
+    try {
+      const { authorId, reportId, content } = data;
+      const reportMessage = new ReportMessage({ authorId, reportId, content });
+      await reportMessage.save();
+
+      return { error: false, data: reportMessage };
     } catch (error) {
       return { error: true, data: error };
     }
