@@ -1,43 +1,35 @@
-import User from '@models/User';
-import { NextFunction, Request, Response } from 'express';
-import { validateToken } from '../config/token';
+import { NextFunction, Response, Request } from 'express';
+import admin from '../firebase/firebase-admin';
 
-export const isAuth = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const isAuth = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({
-      error: true,
-      message: 'Acceso denegado: Token no proporcionado o incorrecto.',
-    });
+    return res
+      .status(401)
+      .json({ error: 'No autorizado. Formato de token inválido' });
   }
 
-  const token = authHeader.split('Bearer ')[1];
+  const idToken = authHeader.split('Bearer ')[1];
 
   try {
-    const decodedToken = validateToken(token);
+    const decodedToken = await admin.auth().verifyIdToken(idToken, true);
 
-    const { email } = decodedToken.user;
+    if (!decodedToken.email)
+      return res.status(401).json({ error: 'Email inválido' });
 
-    const user = await User.findOne({ email });
-
-    if (!user)
-      return res.status(401).json({
-        error: true,
-        message: 'Acceso denegado: Token no proporcionado o incorrecto.',
-      });
-
-    req.user = { email };
+    req.user = {
+      email: decodedToken.email,
+    };
 
     next();
-  } catch (error) {
-    return res.status(401).json({
-      error: true,
-      message: 'Token inválido o expirado.',
-    });
+  } catch (error: any) {
+    if (error.code === 'auth/id-token-expired') {
+      return res.status(401).json({ error: 'El token ha expirado.' });
+    }
+
+    return res.status(403).json({ error: 'Token inválido o no autorizado.' });
   }
 };
+
+export default isAuth;
