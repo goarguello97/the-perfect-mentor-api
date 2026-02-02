@@ -40,7 +40,7 @@ class UserController {
     const { id } = req.params;
     const user = req.body;
     const { error, data } = await UserService.putUser({ ...user, id });
-    console.log(error, data);
+
     if (error) return res.status(404).json(data);
 
     return res.status(200).json(data);
