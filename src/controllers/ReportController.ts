@@ -4,7 +4,14 @@ import { Request, Response } from 'express';
 class ReportController {
   static async getReports(req: Request, res: Response) {
     const { token } = req.params;
-    const { error, data } = await ReportService.getReports({ token });
+    const { page = '1', search, isScrolling } = req.query;
+
+    const { error, data } = await ReportService.getReports({
+      token,
+      page: page.toString(),
+      search: search?.toString(),
+      isScrolling,
+    });
 
     if (error) return res.status(400).json(data);
 

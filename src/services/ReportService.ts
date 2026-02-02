@@ -4,9 +4,18 @@ import admin from '../firebase/firebase-admin';
 import ReportMessage from '@models/ReportMessage';
 
 class ReportService {
-  static async getReports(data: { token: string }) {
-    const { token } = data;
+  static async getReports(data: {
+    token: string;
+    page: string;
+    search: string | undefined;
+    isScrolling: any;
+  }) {
+    const { token, page, search, isScrolling } = data;
+    const LIMIT = 7;
 
+    const currentPage = Math.max(Number(page), 1);
+    const filters: any = {};
+    if (search) filters.name = { $regex: search, $options: 'i' };
     try {
       if (!token) throw new Error('Token no definido');
 
@@ -21,9 +30,32 @@ class ReportService {
 
       if (!id) throw new Error('Id del usuario inválido');
 
-      const reports = await Report.find({
-        $or: [{ senderId: id }, { receiverId: id }],
-      })
+      let matchIds: any[] = [];
+
+      if (search) {
+        const matchedUsers = await User.find({
+          fullname: { $regex: search, $options: 'i' },
+        }).select('_id');
+
+        matchIds = matchedUsers.map((u) => u._id);
+      }
+
+      const query: any = {
+        $and: [{ $or: [{ senderId: user._id }, { receiverId: user._id }] }],
+      };
+
+      if (search) {
+        query.$and.push({
+          $or: [
+            { senderId: { $in: matchIds } },
+            { receiverId: { $in: matchIds } },
+          ],
+        });
+      }
+
+      const reports = await Report.find(query)
+        .skip((currentPage - 1) * LIMIT)
+        .limit(LIMIT)
         .populate({
           path: 'senderId',
           populate: {
@@ -37,7 +69,19 @@ class ReportService {
           },
         });
 
-      return { error: false, data: reports };
+      const total = await Report.countDocuments();
+
+      return {
+        error: false,
+        data: {
+          reports,
+          page: currentPage,
+          perPage: LIMIT,
+          total,
+          totalPages: Math.ceil(total / LIMIT),
+          isScrolling: isScrolling === 'true' || isScrolling === true,
+        },
+      };
     } catch (error) {
       return { error: true, data: error };
     }
