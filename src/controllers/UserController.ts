@@ -31,6 +31,7 @@ class UserController {
   static async addUser(req: Request, res: Response) {
     const user = req.body;
     const { error, data } = await UserService.addUser(user);
+
     if (error) return res.status(409).json(data);
     res.status(201).json(data);
   }
@@ -39,6 +40,7 @@ class UserController {
     const { id } = req.params;
     const user = req.body;
     const { error, data } = await UserService.putUser({ ...user, id });
+    console.log(error, data);
     if (error) return res.status(404).json(data);
 
     return res.status(200).json(data);

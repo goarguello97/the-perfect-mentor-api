@@ -22,6 +22,7 @@ import {
   getTemplateRecoverPassword,
   transporter,
 } from 'src/utils/email';
+import { ObjectId } from 'mongoose';
 
 dotenv.config();
 const EMAIL = process.env.EMAIL as string;
@@ -242,13 +243,13 @@ class UserService {
 
   static async putUser(user: any) {
     try {
-      let userToUpdate = await User.findById(user._id).populate('role', {
+      let userToUpdate = await User.findOne({ id: user.id }).populate('role', {
         role: 1,
         _id: 1,
       });
       let customToken = '';
 
-      if (!userToUpdate) throw new Error('Usuario no disponible.');
+      if (!userToUpdate) throw new Error('Usuario no disponible');
 
       if (user.email) {
         if (user.email !== userToUpdate.email) {
