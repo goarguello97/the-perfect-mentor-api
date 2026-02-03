@@ -69,7 +69,7 @@ class ReportService {
           },
         });
 
-      const total = await Report.countDocuments();
+      const total = await Report.countDocuments(query);
 
       return {
         error: false,
