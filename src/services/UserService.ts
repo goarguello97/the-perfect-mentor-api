@@ -71,8 +71,9 @@ class UserService {
 
     const LIMIT = 7;
     const currentPage = Math.max(Number(page), 1);
-    const filters: any = {    
-      isComplete: true};
+    const filters: any = {
+      isComplete: true,
+    };
     const sort: any = {};
     if (verify === 'true') {
       filters.verify = true;
@@ -194,9 +195,9 @@ class UserService {
 
       if (!id) throw new Error('Id del usuario inválido');
 
-      const user = await User.findOne({id}).populate('role');
+      const user = await User.findOne({ id }).populate('role');
 
-      if(!user) throw new Error("Usuario inválido")
+      if (!user) throw new Error('Usuario inválido');
 
       return { error: false, data: user };
     } catch (error) {
@@ -204,7 +205,11 @@ class UserService {
     }
   }
 
-  static async addUser(user: { email: string; username: string; password: string }) {
+  static async addUser(user: {
+    email: string;
+    username: string;
+    password: string;
+  }) {
     try {
       const { email, username, password } = user;
 
@@ -213,13 +218,14 @@ class UserService {
       if (userByEmail.length > 0)
         throw new Error(`El email ${email} ya se encuentra en uso`);
 
-const userFirebase = await getAuth().createUser({email, password});
+      const userFirebase = await getAuth().createUser({ email, password });
 
-if(!userFirebase) throw new Error(`No se pudo registrar el usuario en firebase`)
+      if (!userFirebase)
+        throw new Error(`No se pudo registrar el usuario en firebase`);
 
       const role = await Role.findOne({ role: 'MENTEE' });
 
-      const newUser = new User({ email, username, id:userFirebase.uid, role });
+      const newUser = new User({ email, username, id: userFirebase.uid, role });
 
       const token = generateTokenRegister({ email: newUser.email });
       const template = getTemplate(token);
@@ -263,7 +269,13 @@ if(!userFirebase) throw new Error(`No se pudo registrar el usuario en firebase`)
         userToUpdate._id,
         {
           ...user,
-          fullname: `${user.name} ${user.lastname}`,
+          name:
+            user.name.charAt(0).toUpperCase() +
+            user.name.slice(1).toLowerCase(),
+          lastname:
+            user.lastname.charAt(0).toUpperCase() +
+            user.lastname.slice(1).toLowerCase(),
+          fullname: `${user.name.charAt(0).toUpperCase() + user.name.slice(1).toLowerCase()} ${user.lastname.charAt(0).toUpperCase() + user.lastname.slice(1).toLowerCase()}`,
           isComplete: true,
         },
         { new: true },
@@ -272,7 +284,7 @@ if(!userFirebase) throw new Error(`No se pudo registrar el usuario en firebase`)
         _id: 1,
       });
 
-if(!updatedUser) throw new Error(`No se pudo actualizar los datos`);
+      if (!updatedUser) throw new Error(`No se pudo actualizar los datos`);
 
       const userResponse = updatedUser.toObject();
 
