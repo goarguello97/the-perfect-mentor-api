@@ -2,13 +2,6 @@ import Avatar from '@models/Avatar';
 import Role from '@models/Role';
 import User from '@models/User';
 import dotenv from 'dotenv';
-import {
-  deleteObject,
-  getDownloadURL,
-  getStorage,
-  ref,
-  uploadBytesResumable,
-} from 'firebase/storage';
 import { v2 as cloudinary } from 'cloudinary';
 import path from 'path';
 import {
@@ -17,13 +10,12 @@ import {
   validateToken,
 } from 'src/config/token';
 import admin from 'src/firebase/firebase-admin';
+import { getAuth } from 'firebase-admin/auth';
 import {
   getTemplate,
   getTemplateRecoverPassword,
   transporter,
 } from 'src/utils/email';
-import { ObjectId } from 'mongoose';
-
 dotenv.config();
 const EMAIL = process.env.EMAIL as string;
 class UserService {
@@ -79,7 +71,8 @@ class UserService {
 
     const LIMIT = 7;
     const currentPage = Math.max(Number(page), 1);
-    const filters: any = {};
+    const filters: any = {    
+      isComplete: true};
     const sort: any = {};
     if (verify === 'true') {
       filters.verify = true;
@@ -201,26 +194,32 @@ class UserService {
 
       if (!id) throw new Error('Id del usuario inválido');
 
-      const response = await User.findById(id).populate('role');
+      const user = await User.findOne({id}).populate('role');
 
-      return { error: false, data: response };
+      if(!user) throw new Error("Usuario inválido")
+
+      return { error: false, data: user };
     } catch (error) {
       return { error: true, data: error };
     }
   }
 
-  static async addUser(user: { email: string; username: string; id: string }) {
+  static async addUser(user: { email: string; username: string; password: string }) {
     try {
-      const { email, username, id } = user;
+      const { email, username, password } = user;
 
       const userByEmail = await User.find({ email });
 
       if (userByEmail.length > 0)
-        throw new Error(`El email ${email} ya se encuentra en uso.`);
+        throw new Error(`El email ${email} ya se encuentra en uso`);
+
+const userFirebase = await getAuth().createUser({email, password});
+
+if(!userFirebase) throw new Error(`No se pudo registrar el usuario en firebase`)
 
       const role = await Role.findOne({ role: 'MENTEE' });
 
-      const newUser = new User({ email, username, id, role });
+      const newUser = new User({ email, username, id:userFirebase.uid, role });
 
       const token = generateTokenRegister({ email: newUser.email });
       const template = getTemplate(token);
@@ -273,7 +272,11 @@ class UserService {
         _id: 1,
       });
 
-      return { error: false, data: { ...updatedUser, customToken } };
+if(!updatedUser) throw new Error(`No se pudo actualizar los datos`);
+
+      const userResponse = updatedUser.toObject();
+
+      return { error: false, data: { ...userResponse, customToken } };
     } catch (error) {
       return { error: true, data: error };
     }
@@ -372,8 +375,8 @@ class UserService {
         })
         .populate('avatar');
 
-      if (!user) throw new Error('Usuario no registrado.');
-      if (!user.verify) throw new Error('Debes activar tu usuario.');
+      if (!user) throw new Error('Usuario no registrado');
+      if (!user.verify) throw new Error('Debes activar tu usuario');
 
       return { error: false, data: user };
     } catch (error: any) {
