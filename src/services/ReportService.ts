@@ -5,30 +5,23 @@ import ReportMessage from '@models/ReportMessage';
 
 class ReportService {
   static async getReports(data: {
-    token: string;
+    id: string;
     page: string;
     search: string | undefined;
     isScrolling: any;
   }) {
-    const { token, page, search, isScrolling } = data;
+    const { id, page, search, isScrolling } = data;
     const LIMIT = 7;
 
     const currentPage = Math.max(Number(page), 1);
     const filters: any = {};
     if (search) filters.name = { $regex: search, $options: 'i' };
     try {
-      if (!token) throw new Error('Token no definido');
+      if (!id) throw new Error('Id del usuario inválido');
 
-      const decodedToken = await admin.auth().verifyIdToken(token);
-      const { uid } = decodedToken;
-
-      const user = await User.findOne({ id: uid });
+      const user = await User.findById(id);
 
       if (!user) throw new Error('Usuario inválido');
-
-      const id = user._id;
-
-      if (!id) throw new Error('Id del usuario inválido');
 
       let matchIds: any[] = [];
 

@@ -32,7 +32,7 @@ class MatchService {
         senderId: senderId,
       });
 
-      return { error: false, message: 'Solicitud enviada.' };
+      return { error: false, message: 'Solicitud enviada' };
     } catch (error) {
       return {
         error: true,
@@ -95,21 +95,14 @@ class MatchService {
     }
   }
 
-  static async getMatches(data: { token: string }) {
-    const { token } = data;
+  static async getMatches(data: { id: string }) {
+    const { id } = data;
     try {
-      if (!token) throw new Error('Token no definido');
+      if (!id) throw new Error('Id del usuario inválido');
 
-      const decodedToken = await admin.auth().verifyIdToken(token);
-      const { uid } = decodedToken;
-
-      const user = await User.findOne({ id: uid });
+      const user = await User.findById(id);
 
       if (!user) throw new Error('Usuario inválido');
-
-      const id = user._id;
-
-      if (!id) throw new Error('Id del usuario inválido');
 
       const friendsList = await Match.find({
         status: 'accepted',
@@ -130,21 +123,14 @@ class MatchService {
     }
   }
 
-  static async getMatchesRequest(data: { token: string }) {
-    const { token } = data;
+  static async getMatchesRequest(data: { id: string }) {
+    const { id } = data;
     try {
-      if (!token) throw new Error('Token no definido');
+      if (!id) throw new Error('Id del usuario inválido');
 
-      const decodedToken = await admin.auth().verifyIdToken(token);
-      const { uid } = decodedToken;
-
-      const user = await User.findOne({ id: uid });
+      const user = await User.findById(id);
 
       if (!user) throw new Error('Usuario inválido');
-
-      const id = user._id;
-
-      if (!id) throw new Error('Id del usuario inválido');
 
       const friendsList = await Match.find({
         status: 'pending',

@@ -1,4 +1,5 @@
 import { socketService } from '@services/SocketService';
+import { specs, swaggerUi } from './config/swagger';
 import cors from 'cors';
 import express from 'express';
 import { createServer } from 'http';
@@ -45,6 +46,7 @@ app.get('/', (_, res) => {
   res.send('Hello World');
 });
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/api', router);
 
 httpServer.listen(PORT, () => {

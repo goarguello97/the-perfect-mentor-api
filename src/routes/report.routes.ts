@@ -7,7 +7,7 @@ import addReportMessageSchema from '../schemas/addReportMessageSchema';
 
 const reportRouter = Router();
 
-reportRouter.get('/:token', isAuth, ReportController.getReports);
+reportRouter.get('/:userId', isAuth, ReportController.getReports);
 reportRouter.get('/report/:id', isAuth, ReportController.getReport);
 reportRouter.post(
   '/',

@@ -19,7 +19,7 @@ matchRouter.patch(
   checkSchema(responseMatchSchema),
   MatchController.responseMatch,
 );
-matchRouter.get('/:token', isAuth, MatchController.getMatches);
-matchRouter.get('/req/:token', isAuth, MatchController.getMatchesRequest);
+matchRouter.get('/:id', isAuth, MatchController.getMatches);
+matchRouter.get('/req/:id', isAuth, MatchController.getMatchesRequest);
 
 export default matchRouter;
