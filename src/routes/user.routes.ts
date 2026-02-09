@@ -12,7 +12,7 @@ const userRouter = Router();
 userRouter.get('/', isAuth, UserController.getUsers);
 userRouter.get('/stats/info', isAuth, UserController.getUserPerMonth);
 userRouter.post('/', checkSchema(addUserSchema), UserController.addUser);
-userRouter.post('/login', UserController.loginUser);
+// userRouter.post('/login', UserController.loginUser);
 userRouter.get('/:id', isAuth, UserController.getUserById);
 userRouter.put(
   '/:id',
